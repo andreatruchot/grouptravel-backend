@@ -3,7 +3,7 @@ const activitiesSchema = mongoose.Schema({
                                            name: String, 
                                            place : String, 
                                            date : Date, 
-                                           picture : String, 
+                                           photo : String, 
                                            url: String, 
                                            description : String,
                                            budget: Number,
@@ -13,7 +13,8 @@ const activitiesSchema = mongoose.Schema({
                                             isFixed: Boolean, });
 
 const accomodationsSchema = mongoose.Schema({ location: String, 
-                                              date : Date, 
+                                              arrivalDate : Date, 
+                                              returnDate : Date, 
                                               photos : [String], 
                                               url: String, 
                                               description : String, 

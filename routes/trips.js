@@ -8,7 +8,7 @@ const User = require('../models/users');
 
 router.post('/addTrip', authenticate, async (req, res) => {
     // Pas besoin de vérifier 'admin' dans le corps de la requête, on utilise 'req.userId' à la place
-    if (!checkBody(req.body, ['name', 'location', 'departureDate', 'returnDate'])) {
+    if (!checkBody(req.body, ['name', 'location', 'departureDate','returnDate'])) {
       return res.json({ result: false, error: 'Missing or empty fields' });
     }
   
