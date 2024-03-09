@@ -1,8 +1,13 @@
 var express = require('express');
+const User = require('../models/users');
 var router = express.Router();
 require('../models/connexion');
-const User = require('../models/users');
 const { checkBody } = require('../modules/checkBody');
+const authenticate = require('../middlewares/authenticate');
+const fileUpload = require('express-fileupload');
+const cloudinary = require('cloudinary').v2;
+
+
 
 const bcrypt = require('bcrypt');
 const uid2 = require('uid2');
@@ -60,6 +65,48 @@ router.post('/signin', (req, res) => {
     }
   });
 });
+
+
+
+// Route POST pour télécharger la photo de profil de l'utilisateur avec Cloudinary
+router.post('/profilePicture', authenticate, async (req, res) => {
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send({ message: "No file uploaded" });
+  }
+
+  const userPicture = req.files.userPicture;
+  const userId = req.userId; // Récupéré par le middleware 'authenticate'
+
+  try {
+    const user = await User.findById(userId);
+
+    if (user && user.cloudinaryPublicId) {
+      // Supprimer l'ancienne image sur Cloudinary
+      await cloudinary.uploader.destroy(user.cloudinaryPublicId);
+    }
+
+    // Télécharger la nouvelle image sur Cloudinary
+    cloudinary.uploader.upload(userPicture.tempFilePath, { folder: "user_pictures" }, async (error, result) => {
+      if (error) {
+        return res.status(500).send({ message: "An error occurred while uploading to Cloudinary", error: error.message });
+      }
+
+      // Mettre à jour l'utilisateur avec le nouvel URL de l'image et l'ID public Cloudinary
+      const updatedUser = await User.findByIdAndUpdate(userId, { userPicture: result.secure_url, cloudinaryPublicId: result.public_id }, { new: true });
+
+      if (!updatedUser) {
+        return res.status(404).send({ message: "User not found" });
+      }
+
+      res.send({ message: "Profile picture updated successfully", userPicture: result.secure_url });
+    });
+
+  } catch (dbError) {
+    res.status(500).send({ message: "An error occurred while updating user info", error: dbError.message });
+  }
+});
+
+
 
 
 
