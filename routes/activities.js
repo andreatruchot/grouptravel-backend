@@ -12,7 +12,6 @@ router.post('/addActivity/:tripId', authenticate, async (req, res) => {
         return res.json({ result: false, error: 'Missing or empty fields' });
     }
 
-    
     try {
         // Récupère l'ID du voyage depuis l'URL
         const { tripId } = req.params;
