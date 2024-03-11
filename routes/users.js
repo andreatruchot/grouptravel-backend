@@ -66,8 +66,6 @@ router.post('/signin', (req, res) => {
   });
 });
 
-
-
 // Route POST pour télécharger la photo de profil de l'utilisateur avec Cloudinary
 router.post('/profilePicture', authenticate, async (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -76,6 +74,18 @@ router.post('/profilePicture', authenticate, async (req, res) => {
 
   const userPicture = req.files.userPicture;
   const userId = req.userId; // Récupéré par le middleware 'authenticate'
+
+  // Validation de la taille du fichier (par exemple, 5MB max)
+  const maxFileSize = 5 * 1024 * 1024; // 5MB en octets
+  if (userPicture.size > maxFileSize) {
+    return res.status(400).send({ message: "File is too large. Max size is 5MB." });
+  }
+  
+  // Validation du type de fichier
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  if (!allowedMimeTypes.includes(userPicture.mimetype)) {
+    return res.status(400).send({ message: "Invalid file type. Only JPG, PNG, and GIF files are allowed." });
+  }
 
   try {
     const user = await User.findById(userId);
@@ -105,9 +115,5 @@ router.post('/profilePicture', authenticate, async (req, res) => {
     res.status(500).send({ message: "An error occurred while updating user info", error: dbError.message });
   }
 });
-
-
-
-
 
 module.exports = router;
