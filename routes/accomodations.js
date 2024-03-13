@@ -7,7 +7,7 @@ const authenticate = require('../middlewares/authenticate');
 const User = require('../models/users');
 
 // Ajoute un logement à un voyage existant
-router.post('/addAccommodation/:tripId', authenticate, async (req, res) => {
+router.post('/addAccomodation/:tripId', authenticate, async (req, res) => {
     if (!checkBody(req.body, ['location', 'arrivalDate', 'departureDate', 'budget', 'description'])) {
         return res.json({ result: false, error: 'Missing or empty fields' });
     }

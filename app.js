@@ -12,8 +12,9 @@ const fileUpload = require('express-fileupload');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const tripsRouter = require('./routes/trips');
-const accommodationsRouter = require('./routes/accommodations.js');
+const accomodationsRouter = require('./routes/accomodations.js');
 const activitiesRouter = require('./routes/activities.js');
+const invitationsRouter = require('./routes/invitations.js');
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -41,8 +42,9 @@ app.use(cors());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/trips', tripsRouter);
-app.use('/accommodations', accommodationsRouter);
+app.use('/accomodations', accomodationsRouter);
 app.use('/activities', activitiesRouter)
+app.use('/invitations', invitationsRouter);
 
 
 module.exports = app;

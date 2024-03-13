@@ -135,7 +135,7 @@ router.get('/:id', authenticate, async (req, res) => {
       })
       .populate({
         path: 'accomodations',
-        select: 'location arrivalDate returnDate'
+        select: 'name location arrivalDate returnDate'
       })
       .populate('chat.author', 'username') // Peuple l'auteur des messages dans le chat avec le nom d'utilisateur seulement
       .exec();
