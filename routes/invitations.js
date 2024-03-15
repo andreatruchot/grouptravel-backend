@@ -20,9 +20,11 @@ router.post('/send-invitation', async (req, res) => {
     await invitation.save();
 
     // Envoyer l'email d'invitation
-    const invitationLink =  `http://localhost:3000/invitations/send-invitation?token=${invitation.token}&tripId=${tripId}`;
-    
+    const invitationLink = `http://localhost:3001/accept-invitation?token=${invitation.token}&tripId=${tripId}`;
+
     sendInvitationEmail(email, invitationLink);
+
+
 
     res.status(200).json({ message: "Invitation envoyée avec succès." });
   } catch (error) {
@@ -66,5 +68,6 @@ router.post('/accept-invitation', async (req, res) => {
         res.status(500).json({ message: "Erreur lors de l\'acceptation de l\'invitation." });
     }
 });
+
 
 module.exports = router;
