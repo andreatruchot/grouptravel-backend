@@ -53,7 +53,7 @@ router.post('/addTrip', authenticate, async (req, res) => {
         return res.json({ result: false, error: "Failed to update the user's myTrips" });
       }
   
-      res.json({ result: true, trip: savedTrip });
+      res.json({ result: true, trip: savedTrip, tripId: savedTrip._id});
     } catch (error) {
         
       res.json({ result: false, error: error });
