@@ -84,8 +84,9 @@ router.get('/myTrips', authenticate, async (req, res) => {
         select: 'name location departureDate returnDate budget admin members activities accomodations chat',
        
         populate: [
-          { path: 'activities', select: 'name place date' },
-          { path: 'accomodations', select: 'location arrivalDate returnDate' },
+          { path: 'activities', select: 'name place date description budget' },
+          { path: 'accomodations', select: 'location arrivalDate returnDate description budget' },
+          { path: 'members', select: 'username -_id' },
           // ...plus de peuplements si vous avez d'autres sous-documents
         ]
       })
@@ -105,7 +106,7 @@ router.get('/myTrips', authenticate, async (req, res) => {
         returnDate: trip.returnDate,
         budget: trip.budget,
         isAdmin: trip.admin.equals(userId),
-        members: trip.members, // Assurez-vous d'avoir les autorisations pour afficher cette information
+        members: trip.members, 
         activities: trip.activities,
         accomodations: trip.accomodations,
         chat: trip.chat,
@@ -128,21 +129,27 @@ router.get('/:id', authenticate, async (req, res) => {
     const userId = req.userId;
     const tripId = req.params.id;
 
-    const trip = await Trip.findOne({ _id: tripId, admin: userId })
+    const trip = await Trip.findOne({ _id: tripId, members: userId })
       .populate({
         path: 'activities',
-        select: 'name place date'
+        select: 'name place date description budget'
       })
       .populate({
         path: 'accomodations',
-        select: 'name location arrivalDate returnDate'
+        select: 'location arrivalDate returnDate description budget'
       })
+      .populate({
+        path: 'members',
+        select: 'username -_id' 
+      })
+      
       .populate('chat.author', 'username') // Peuple l'auteur des messages dans le chat avec le nom d'utilisateur seulement
       .exec();
 
     if (!trip) {
       return res.status(404).json({ message: 'Trip not found' });
     }
+    console.log("Membres peuplés :", trip.members);
 
     // Envoyer les détails du voyage trouvé
     res.json(trip);
@@ -152,5 +159,40 @@ router.get('/:id', authenticate, async (req, res) => {
   }
 });
 
+// Route pour supprimer un voyage
+router.delete('/deleteTrip/:tripId', authenticate, async (req, res) => {
+  const { tripId } = req.params;
+  const userId = req.userId; // Supposé être défini par le middleware 'authenticate'
 
+  try {
+      const trip = await Trip.findById(tripId);
+
+      // Vérifier si le voyage existe
+      if (!trip) {
+        return res.status(404).json({ result: false, error: 'Voyage non trouvé.' });
+      }
+      console.log(`Voyage trouvé. Admin du voyage: ${trip.admin}, Utilisateur demandeur: ${userId}`);
+
+      if (trip.admin.toString() !== userId) {
+        return res.status(403).json({ result: false, error: 'Non autorisé.' });
+    }
+
+      await Trip.findByIdAndDelete(tripId);
+      console.log(`Voyage ${tripId} supprimé avec succès.`);
+
+      await User.findByIdAndUpdate(userId, { $pull: { myTrips: tripId } });
+      console.log(`Voyage retiré de la liste des voyages de l'utilisateur ${userId}.`);
+
+
+      res.json({ result: true, message: 'Voyage supprimé avec succès.' });
+  }catch (error) {
+    // Gestion de l'ID du voyage invalide ou d'autres erreurs
+    if (error.kind === 'ObjectId') {
+      console.error('Erreur de suppression du voyage : ID de voyage invalide.', error);
+        return res.status(400).json({ result: false, error: 'ID de voyage invalide.' });
+    }
+    console.error('Erreur de suppression du voyage:', error);
+    res.status(500).json({ result: false, error: 'Erreur serveur' });
+} 
+});
 module.exports = router;

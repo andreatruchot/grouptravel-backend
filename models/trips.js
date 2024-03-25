@@ -15,7 +15,7 @@ const activitiesSchema = mongoose.Schema({
 const accomodationsSchema = mongoose.Schema({ location: String, 
                                               arrivalDate : Date, 
                                               returnDate : Date, 
-                                              photos : [String], 
+                                              photo : String, 
                                               url: String, 
                                               description : String, 
                                               budget: Number, 
