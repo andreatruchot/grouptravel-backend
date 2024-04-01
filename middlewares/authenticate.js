@@ -18,7 +18,7 @@ const authenticate = async (req, res, next) => {
       return res.status(404).json({ message: 'User not found with provided token' });
     }
 
-    req.userId = user._id.toString(); ; // Attacher l'ID de l'utilisateur à l'objet req
+    req.userId = user._id.toString(); 
     next();
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });

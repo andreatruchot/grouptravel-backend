@@ -124,6 +124,7 @@ if (!result) {
        }
        });
        // Route pour voter sur une activité
+
 router.post('/vote/:activityId', authenticate, async (req, res) => {
   const { activityId } = req.params;
   const userId = req.userId; // Assuré par le middleware 'authenticate'
@@ -191,6 +192,31 @@ router.post('/select/:tripId/:activityId', authenticate, async (req, res) => {
     res.status(200).send({ message: "Activité sélectionnée avec succès." });
   } catch (error) {
     res.status(500).send({ message: "Erreur du serveur.", error: error.message });
+  }
+});
+router.delete('/:activityId', authenticate, async (req, res) => {
+  const { activityId } = req.params;
+  try {
+    // Trouver le voyage qui contient l'activité
+    const trip = await Trip.findOne({ 'activities._id': activityId });
+
+    if (!trip) {
+      return res.status(404).send({ message: "Activité non trouvée." });
+    }
+
+    // Vérifier si l'utilisateur est l'admin du voyage
+    if (!trip.admin.equals(req.userId)) {
+      return res.status(403).send({ message: "Seul l'administrateur du voyage peut supprimer les activités." });
+    }
+
+    // Supprimer l'activité du tableau activities
+    trip.activities.pull({ _id: activityId });
+    await trip.save();
+
+    res.send({ message: "Activité supprimée avec succès." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Erreur du serveur.", error: error.toString() });
   }
 });
 

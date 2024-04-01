@@ -9,7 +9,7 @@ const cloudinary = require('cloudinary').v2;
 
 // Ajoute un logement à un voyage existant
 router.post('/addAccomodation/:tripId', authenticate, async (req, res) => {
-    if (!checkBody(req.body, ['location', 'arrivalDate', 'departureDate', 'budget', 'description'])) {
+    if (!checkBody(req.body, ['location', 'arrivalDate', 'returnDate', 'budget', 'description'])) {
         return res.json({ result: false, error: 'Missing or empty fields' });
     }
     if (!req.files || !req.files.photo) {
@@ -58,10 +58,10 @@ router.post('/addAccomodation/:tripId', authenticate, async (req, res) => {
      });
 
         // Crée le nouvel hébergement avec les informations fournies
-        const newAccommodation = {
+        const newAccomodation = {
             location: req.body.location,
             arrivalDate: req.body.arrivalDate,
-            departureDate: req.body.returnDate,
+            returnDate: req.body.returnDate,
             photo: result.secure_url,
             url: req.body.url || '',
             description: req.body.description,
@@ -72,7 +72,7 @@ router.post('/addAccomodation/:tripId', authenticate, async (req, res) => {
         };
 
         // Ajoute le nouvel hébergement au voyage
-        trip.accomodations.push(newAccommodation);
+        trip.accomodations.push(newAccomodation);
         await trip.save();
 
         res.json({ result: true, message: 'Accommodation added successfully to the trip' });
@@ -154,26 +154,24 @@ router.post('/vote/:accomodationId', authenticate, async (req, res) => {
     try {
       const trip = await Trip.findById(tripId);
       if (!trip) return res.status(404).send({ message: "Voyage non trouvé." });
-      if (!trip.admin.equals(userId)) return res.status(403).send({ message: "Action non autorisée." });
+      if (!trip.admin.equals(userId)) return res.status(403).send({ message: "Action non autorisé." });
   
-      // Trouve l'hébergement sélectionné
-      const selectedAccomodation = trip.accomodations.find(accomodation => accomodation._id.equals(accomodationId));
-      if (!selectedAccomodation) {
-        return res.status(404).send({ message: "Hébergement non trouvée." });
+      let selectedAccomodation;
+      for (let accomodation of trip.accomodations) {
+        if (accomodation._id.toString() === accomodationId) {
+          selectedAccomodation = accomodation;
+          break;
+        }
       }
-      const selectedArrivalDate = selectedAccomodation.arrivalDate.toISOString().split('T')[0];
-      const selectedReturnDate = selectedAccomodation.returnDate.toISOString().split('T')[0];
-  
-      trip.accomodations.forEach(accomodation => {
-        console.log(accomodation);
-        const accomodationArrivalDate = accomodation.arrivalDate.toISOString().split('T')[0];
-        const accomodationReturnDate = accomodation.returnDate.toISOString().split('T')[0];
-        
-        // Vérifie si l'hébergement en cours de parcours a la même date d'arrivée ou de retour que l'hébergement sélectionné
-        if (accomodationArrivalDate === selectedArrivalDate || accomodationReturnDate === selectedReturnDate) {
-          // Fixe uniquement l'hébergement sélectionné, désélectionne les autres pour les mêmes dates
-          accomodation.isFixed = accomodation._id.equals(accomodationId);
-        } 
+
+      if (!selectedAccomodation) {
+        return res.status(404).send({ message: "Hébergement non trouvé." });
+      }
+
+      trip.accomodations.forEach(accomodation => { 
+       
+        accomodation.isFixed = accomodation._id.toString() === accomodationId;
+       
       });
   
       await trip.save();
@@ -181,7 +179,31 @@ router.post('/vote/:accomodationId', authenticate, async (req, res) => {
     } catch (error) {
       res.status(500).send({ message: "Erreur du serveur.", error: error.message });
     }
-});
-  
-  
+     });
+
+     router.delete('/:accomodationId', authenticate, async (req, res) => {
+      const { accomodationId } = req.params;
+      try {
+        // Trouver le voyage qui contient l'hébergement
+        const trip = await Trip.findOne({ 'accomodations._id': accomodationId });
+    
+        if (!trip) {
+          return res.status(404).send({ message: "Hébergement non trouvé." });
+        }
+    
+        // Vérifier si l'utilisateur est l'admin du voyage
+        if (!trip.admin.equals(req.userId)) {
+          return res.status(403).send({ message: "Seul l'administrateur du voyage peut supprimer les hébergements." });
+        }
+    
+        // Supprimer l'activité du tableau activities
+        trip.accomodations.pull({ _id: accomodationId });
+        await trip.save();
+    
+        res.send({ message: "Hébergement supprimé avec succès." });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Erreur du serveur.", error: error.toString() });
+      }
+    });
 module.exports = router;

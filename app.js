@@ -6,8 +6,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cloudinary = require('cloudinary').v2;
-const fileUpload = require('express-fileupload');
-
+const fileUpload = require('express-fileupload')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -16,6 +15,7 @@ const accomodationsRouter = require('./routes/accomodations.js');
 const activitiesRouter = require('./routes/activities.js');
 const invitationsRouter = require('./routes/invitations.js');
 const planningRouter = require('./routes/planning.js');
+const chatsRouter = require('./routes/chats.js')
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -47,6 +47,7 @@ app.use('/accomodations', accomodationsRouter);
 app.use('/activities', activitiesRouter);
 app.use('/invitations', invitationsRouter);
 app.use('/planning', planningRouter);
+app.use('/chats', chatsRouter);
 
 
 module.exports = app;

@@ -195,4 +195,19 @@ router.delete('/deleteTrip/:tripId', authenticate, async (req, res) => {
     res.status(500).json({ result: false, error: 'Erreur serveur' });
 } 
 });
+
+
+// Route pour obtenir la localisation d'un voyage par son ID
+
+router.get('/location/:tripId', async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.tripId).select('location -_id');
+    if (!trip) {
+      return res.status(404).send('Voyage non trouvé');
+    }
+    res.json(trip); // Renvoie la localisation du voyage
+  } catch (error) {
+    res.status(500).send(error.toString());
+  }
+});
 module.exports = router;

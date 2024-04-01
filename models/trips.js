@@ -20,6 +20,7 @@ const accomodationsSchema = mongoose.Schema({ location: String,
                                               description : String, 
                                               budget: Number, 
                                               vote: [{ userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' }, status: Boolean }], isFixed: Boolean, });
+                                              
 const chatSchema = mongoose.Schema({ author: { type: mongoose.Schema.Types.ObjectId, ref: 'users' }, date: Date, message: String })
 
 const tripSchema = mongoose.Schema({ name : String, 
