@@ -15,7 +15,8 @@ const accomodationsRouter = require('./routes/accomodations.js');
 const activitiesRouter = require('./routes/activities.js');
 const invitationsRouter = require('./routes/invitations.js');
 const planningRouter = require('./routes/planning.js');
-const chatsRouter = require('./routes/chats.js')
+const chatsRouter = require('./routes/chats.js');
+const tripPictureRouter = require('./routes/tripPictures');
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -48,6 +49,7 @@ app.use('/activities', activitiesRouter);
 app.use('/invitations', invitationsRouter);
 app.use('/planning', planningRouter);
 app.use('/chats', chatsRouter);
+app.use('/tripPictures', tripPictureRouter);
 
 
 module.exports = app;

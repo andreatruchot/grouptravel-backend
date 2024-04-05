@@ -140,8 +140,9 @@ router.get('/:id', authenticate, async (req, res) => {
       })
       .populate({
         path: 'members',
-        select: 'username -_id' 
+        select: 'username userPicture -_id'
       })
+      
       
       .populate('chat.author', 'username') // Peuple l'auteur des messages dans le chat avec le nom d'utilisateur seulement
       .exec();
@@ -210,4 +211,28 @@ router.get('/location/:tripId', async (req, res) => {
     res.status(500).send(error.toString());
   }
 });
+// Route pour récupérer les profils des membres d'un voyage
+router.get('/members/:tripId', async (req, res) => {
+  try {
+      const { tripId } = req.params;
+      const trip = await Trip.findById(tripId).populate('members', 'userPicture username email').exec();
+
+      if (!trip) {
+          return res.status(404).json({ message: 'Trip not found' });
+      }
+
+      const memberProfiles = trip.members.map(member => ({
+          username: member.username,
+          email: member.email,
+          userPicture: member.userPicture
+      }));
+
+      res.json(memberProfiles);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+  }
+});
+
+module.exports = router;
 module.exports = router;
