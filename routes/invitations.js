@@ -7,7 +7,8 @@ const Invitation = require('../models/invitations');
 const bcrypt = require('bcrypt');
 const uid2 = require('uid2');
 const token = uid2(32);
-const authenticate = require('../middlewares/authenticate'); 
+const authenticate = require('../middlewares/authenticate');
+const { validateEmailFormat, checkDomain } = require('../services/validateEmailService'); 
 
 
 
@@ -41,6 +42,41 @@ router.post('/send-invitation', authenticate, async (req, res) => {
 //route pour s'inscrire et accepter l'invitation
 router.post('/signup', async (req, res) => {
   const { email, password, username, token: token} = req.body;
+
+  //vérifie si les champs sont remplis
+
+  if (!checkBody(req.body, ['username', 'password', 'email'])) {
+    res.json({ result: false, error: 'Missing or empty fields' });
+    return;
+  }
+
+  // Valide le format de l'adresse email
+  if (!validateEmailFormat(email)) {
+    return res.status(400).json({ result: false, error: "L'adresse email n'est pas valide." });
+  }
+  
+   // Expression régulière pour valider la force du mot de passe
+   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+
+   // Vérifie si le mot de passe respecte les critères de sécurité
+   if (!passwordRegex.test(req.body.password)) {
+     res.json({ result: false, error: 'Le mot de passe doit contenir 10 caracteres, une majuscule,un chiffre et un caractere spéciale.' });
+     return;
+   }
+   // Vérification supplémentaire pour s'assurer que les mots de passe correspondent
+  if (req.body.password !== req.body.confirmPassword) {
+    res.json({ result: false, error: 'les mots de passe ne sont pas identiques' });
+    return;
+  }
+  // Vérifie l'existence du domaine (asynchrone)
+  try {
+    const domainIsValid = await checkDomain(email);
+    if (!domainIsValid) {
+      return res.status(400).json({ result: false, error: 'Le domaine de l\'adresse email n\'est pas valide.' });
+    }
+  } catch (error) {
+    return res.status(500).json({ result: false, error: 'Erreur lors de la vérification du domaine.' });
+  }
   
   try {
     const invitation = await Invitation.findOne({ token, status: 'pending' });
