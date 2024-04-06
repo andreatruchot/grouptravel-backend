@@ -7,26 +7,28 @@ const Invitation = require('../models/invitations');
 const bcrypt = require('bcrypt');
 const uid2 = require('uid2');
 const token = uid2(32);
+const authenticate = require('../middlewares/authenticate'); 
 
 
 
-// Route pour envoyer une invitation
-router.post('/send-invitation', async (req, res) => {
-  const { email, tripId } = req.body;
+router.post('/send-invitation', authenticate, async (req, res) => {
+  const { email: recipientEmail, tripId } = req.body;
   try {
-    // Générer un nouveau token et enregistrer l'invitation
+    const user = await User.findById(req.userId); // Utilise l'ID utilisateur mis dans req par le middleware
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+// L'email de l'utilisateur qui invite
+    const senderEmail = user.email; 
     const invitation = new Invitation({
-      email,
+      email: recipientEmail,
       tripId,
-      // Le token est généré automatiquement selon le schéma
     });
     await invitation.save();
 
-    // Envoyer l'email d'invitation
     const invitationLink = `http://localhost:3001/Accept-invitation?token=${invitation.token}&tripId=${tripId}`;
-
-    sendInvitationEmail(email, invitationLink);
-
+    sendInvitationEmail(user.email, recipientEmail, invitationLink); // Passez l'email de l'expéditeur ici
 
     res.status(200).json({ message: "Invitation envoyée avec succès." });
   } catch (error) {
