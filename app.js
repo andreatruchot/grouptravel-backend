@@ -30,13 +30,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Configuration de CORS
-const corsOptions = {
-  origin: ['https://your-frontend-domain.com'], // Remplacez par votre domaine réel
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
 
+app.use(cors()); 
 // Configuration pour la sécurité et la performance
 app.use(helmet());
 app.use(compression());
