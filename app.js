@@ -21,7 +21,8 @@ const app = express();
 
 // Configuration de morgan pour écrire dans un fichier en mode 'combined'
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
-app.use(morgan('combined', { stream: accessLogStream }));
+app.use(morgan('combined'));
+
 
 // Middleware
 app.use(express.json());
