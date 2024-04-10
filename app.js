@@ -1,14 +1,12 @@
 require('dotenv').config();
-const fs = require('fs');
-const helmet = require('helmet');
+
 const cors = require('cors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const cloudinary = require('cloudinary').v2;
 const fileUpload = require('express-fileupload');
-const morgan = require('morgan');
-const compression = require('compression');
+
 
 // Configuration de Cloudinary
 cloudinary.config({
@@ -18,10 +16,6 @@ cloudinary.config({
 });
 
 const app = express();
-
-// Configuration de morgan pour écrire dans un fichier en mode 'combined'
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
-app.use(morgan('combined'));
 
 
 // Middleware
@@ -34,8 +28,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use(cors()); 
 // Configuration pour la sécurité et la performance
-app.use(helmet());
-app.use(compression());
+
 
 // Configuration de l'upload de fichiers avec limites de taille
 app.use(fileUpload({
