@@ -29,7 +29,7 @@ router.post('/send-invitation', authenticate, async (req, res) => {
     });
     await invitation.save();
 
-    const invitationLink = `http://localhost:3001/Accept-invitation?token=${invitation.token}&tripId=${tripId}`;
+    const invitationLink = `https://grouptravel-frontend.vercel.app/Accept-invitation?token=${invitation.token}&tripId=${tripId}`;
     sendInvitationEmail(user.email, recipientEmail, invitationLink); // Passez l'email de l'expéditeur ici
 
     res.status(200).json({ message: "Invitation envoyée avec succès." });
