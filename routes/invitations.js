@@ -5,6 +5,7 @@ const User = require('../models/users');
 const Trip = require('../models/trips');
 const Invitation = require('../models/invitations'); 
 const bcrypt = require('bcrypt');
+const { checkBody } = require('../modules/checkBody');
 const uid2 = require('uid2');
 const token = uid2(32);
 const authenticate = require('../middlewares/authenticate');
@@ -41,7 +42,7 @@ router.post('/send-invitation', authenticate, async (req, res) => {
 
 //route pour s'inscrire et accepter l'invitation
 router.post('/signup', async (req, res) => {
-  const { email, password, username, token: token} = req.body;
+  const { email, password, username, token: invitationToken} = req.body;
 
   //vérifie si les champs sont remplis
 
@@ -79,7 +80,7 @@ router.post('/signup', async (req, res) => {
   }
   
   try {
-    const invitation = await Invitation.findOne({ token, status: 'pending' });
+    const invitation = await Invitation.findOne({ token: invitationToken, status: 'pending', email });
     if (!invitation || invitation.email !== email) {
       return res.status(400).json({ message: 'Invitation invalide ou déjà acceptée.' });
     }
