@@ -33,7 +33,7 @@ router.post('/send-invitation', authenticate, async (req, res) => {
     sendInvitationEmail(user.email, recipientEmail, invitationLink); // Passe l'email de l'expéditeur ici
     console.log(`Envoi d'une invitation de ${senderEmail} à ${recipientEmail} : ${invitationLink}`);
 
-    res.status(200).json({ message: "Invitation envoyée avec succès." });
+    res.status(200).json({ message: "Invitation envoyée avec succès.", tripId });
   } catch (error) {
     console.error("Erreur lors de l'envoi de l'invitation : ", error);
     res.status(500).json({ message: "Erreur lors de l'envoi de l'invitation." });
