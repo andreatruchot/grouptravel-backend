@@ -133,7 +133,7 @@ router.post('/vote/:accomodationId', authenticate, async (req, res) => {
         existingVote.status = status;
 
       } else if (status === true) {
-        // Ajouter une nouvelle participation si l'utilisateur vote "oui" et n'a pas déjà voté
+        // Ajoute une nouvelle participation si l'utilisateur vote "oui" et n'a pas déjà voté
         accomodation.vote.push({ userId: req.userId, status });
   
       } else {

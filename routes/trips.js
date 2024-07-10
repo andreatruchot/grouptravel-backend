@@ -44,7 +44,7 @@ router.post('/addTrip', authenticate, async (req, res) => {
       
       // Mise à jour de l'utilisateur avec le nouveau voyage, en utilisant 'req.userId'
       const updatedUser = await User.findByIdAndUpdate(
-        req.userId, // Utilisez 'req.userId' ici aussi
+        req.userId,
         { $push: { myTrips: savedTrip._id } },
         { new: true, useFindAndModify: false }
       );
@@ -87,7 +87,7 @@ router.get('/myTrips', authenticate, async (req, res) => {
           { path: 'activities', select: 'name place date description budget' },
           { path: 'accomodations', select: 'location arrivalDate returnDate description budget' },
           { path: 'members', select: 'username -_id' },
-          // ...plus de peuplements si vous avez d'autres sous-documents
+       
         ]
       })
       .exec();
@@ -110,7 +110,7 @@ router.get('/myTrips', authenticate, async (req, res) => {
         activities: trip.activities,
         accomodations: trip.accomodations,
         chat: trip.chat,
-        // ...incluez d'autres champs si nécessaire
+    
       };
     });
 
@@ -152,7 +152,7 @@ router.get('/:id', authenticate, async (req, res) => {
     }
     console.log("Membres peuplés :", trip.members);
 
-    // Envoyer les détails du voyage trouvé
+    // Envoye les détails du voyage trouvé
     res.json(trip);
   } catch (error) {
     console.error('Error fetching trip details:', error);
@@ -168,7 +168,7 @@ router.delete('/deleteTrip/:tripId', authenticate, async (req, res) => {
   try {
       const trip = await Trip.findById(tripId);
 
-      // Vérifier si le voyage existe
+      // Vérifie si le voyage existe
       if (!trip) {
         return res.status(404).json({ result: false, error: 'Voyage non trouvé.' });
       }
@@ -234,5 +234,5 @@ router.get('/members/:tripId', async (req, res) => {
   }
 });
 
-module.exports = router;
+
 module.exports = router;

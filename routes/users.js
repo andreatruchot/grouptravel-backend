@@ -63,6 +63,8 @@ router.post('/signup', async (req, res) => {
       const hash = bcrypt.hashSync(req.body.password, 10);
       const uniqueToken = uid2(32); // Génére un token unique pour ce nouvel utilisateur
 
+      //création d'un nouvel utilisateur avec le champ userPicture vide et le tableau myTrips vide
+
       const newUser = new User({
         username: req.body.username,
         password: hash,
@@ -71,7 +73,7 @@ router.post('/signup', async (req, res) => {
         userPicture: '',
         myTrips: []
       });
-
+       // enrigistre l'utilisateur en bdd
       newUser.save().then(newDoc => {
         res.json({ result: true, token: newDoc.token });
       });
@@ -80,19 +82,25 @@ router.post('/signup', async (req, res) => {
     }
   });
 });
-
+// Définition d'une route POST pour gérer les demandes de connexion
 router.post('/signin', (req, res) => {
-  console.log('body: ');
+
+  // Vérifie que les champs 'email' et 'password' sont présents et non vides dans le corps de la requête
   if (!checkBody(req.body, ['email', 'password'])) {
 
+     // Si des champs sont manquants ou vides, envoie une réponse JSON avec un résultat négatif et un message d'erreur
     res.json({ result: false, error: 'Missing or empty fields' });
-    return;
+    return;// Stoppe l'exécution de la fonction
   }
 
+  // Cherche un utilisateur dans la base de données dont l'email correspond à celui fourni dans la requête
   User.findOne({ email: req.body.email }).then(data => {
+     // Si un utilisateur est trouvé et que le mot de passe fourni correspond au mot de passe hashé stocké
     if (data && bcrypt.compareSync(req.body.password, data.password)) {
+       // Envoie une réponse JSON avec un résultat positif, le token de l'utilisateur, et le nom d'utilisateur
       res.json({ result: true, token: data.token, username: data.username });
     } else {
+      // Si aucun utilisateur n'est trouvé ou si le mot de passe ne correspond pas, envoie une réponse JSON avec un résultat négatif et un message d'erreur
       res.json({ result: false, error: 'User not found or wrong password' });
     }
   });
@@ -123,17 +131,17 @@ router.post('/profilePicture', authenticate, async (req, res) => {
     const user = await User.findById(userId);
 
     if (user && user.cloudinaryPublicId) {
-      // Supprimer l'ancienne image sur Cloudinary
+      // Supprime l'ancienne image sur Cloudinary
       await cloudinary.uploader.destroy(user.cloudinaryPublicId);
     }
 
-    // Télécharger la nouvelle image sur Cloudinary
+    // Télécharge la nouvelle image sur Cloudinary
     cloudinary.uploader.upload(userPicture.tempFilePath, { folder: "user_pictures" }, async (error, result) => {
       if (error) {
         return res.status(500).send({ message: "An error occurred while uploading to Cloudinary", error: error.message });
       }
 
-      // Mettre à jour l'utilisateur avec le nouvel URL de l'image et l'ID public Cloudinary
+      // Met à jour l'utilisateur avec le nouvel URL de l'image et l'ID public Cloudinary
       const updatedUser = await User.findByIdAndUpdate(userId, { userPicture: result.secure_url, cloudinaryPublicId: result.public_id }, { new: true });
 
       if (!updatedUser) {
