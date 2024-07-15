@@ -39,8 +39,8 @@ router.post('/addTrip', authenticate, async (req, res) => {
       });
       
       const savedTrip = await newTrip.save();
-      console.log('Updating user with ID:', req.userId);
-      console.log('Adding trip with ID to myTrips:', savedTrip._id);
+      //console.log('Updating user with ID:', req.userId);
+      //console.log('Adding trip with ID to myTrips:', savedTrip._id);
       
       // Mise à jour de l'utilisateur avec le nouveau voyage, en utilisant 'req.userId'
       const updatedUser = await User.findByIdAndUpdate(
@@ -150,12 +150,12 @@ router.get('/:id', authenticate, async (req, res) => {
     if (!trip) {
       return res.status(404).json({ message: 'Trip not found' });
     }
-    console.log("Membres peuplés :", trip.members);
+    //console.log("Membres peuplés :", trip.members);
 
     // Envoye les détails du voyage trouvé
     res.json(trip);
   } catch (error) {
-    console.error('Error fetching trip details:', error);
+    //console.error('Error fetching trip details:', error);
     res.status(500).json({ message: 'Error fetching trip details', error });
   }
 });
@@ -172,17 +172,17 @@ router.delete('/deleteTrip/:tripId', authenticate, async (req, res) => {
       if (!trip) {
         return res.status(404).json({ result: false, error: 'Voyage non trouvé.' });
       }
-      console.log(`Voyage trouvé. Admin du voyage: ${trip.admin}, Utilisateur demandeur: ${userId}`);
+      //console.log(`Voyage trouvé. Admin du voyage: ${trip.admin}, Utilisateur demandeur: ${userId}`);
 
       if (trip.admin.toString() !== userId) {
         return res.status(403).json({ result: false, error: 'Non autorisé.' });
     }
 
       await Trip.findByIdAndDelete(tripId);
-      console.log(`Voyage ${tripId} supprimé avec succès.`);
+      //console.log(`Voyage ${tripId} supprimé avec succès.`);
 
       await User.findByIdAndUpdate(userId, { $pull: { myTrips: tripId } });
-      console.log(`Voyage retiré de la liste des voyages de l'utilisateur ${userId}.`);
+      //console.log(`Voyage retiré de la liste des voyages de l'utilisateur ${userId}.`);
 
 
       res.json({ result: true, message: 'Voyage supprimé avec succès.' });
