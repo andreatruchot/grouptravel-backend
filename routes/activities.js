@@ -95,18 +95,18 @@ if (!result) {
     try {
         
         const { tripId } = req.params;
-        console.log(`Fetching activities for tripId: ${tripId}`); 
+        //console.log(`Fetching activities for tripId: ${tripId}`); 
 
         const trip = await Trip.findById(tripId);
         if (!trip) {
-            console.log('Trip not found');
+            //console.log('Trip not found');
             return res.status(404).json({ result: false, message: 'Trip not found' });
         }
   
         // Vérification si l'utilisateur est membre du voyage ou l'admin
         const isMember = trip.members.includes(req.userId) || trip.admin.toString() === req.userId;
         if (!isMember) {
-            console.log('User is not a member of this trip');
+            //console.log('User is not a member of this trip');
             return res.status(403).json({ result: false, message: "User is not a member of this trip" });
         }
        
@@ -116,7 +116,7 @@ if (!result) {
         return { ...activity.toObject(), voteCount }; // Convertit le document Mongoose en objet JS et ajoute le voteCount
       });
 
-         console.log('Sending activities with vote counts:', activitiesWithVoteCount);
+         //console.log('Sending activities with vote counts:', activitiesWithVoteCount);
          res.json({ result: true, activities: activitiesWithVoteCount });
          } catch (error) {
          console.error('Error fetching activities:', error);
