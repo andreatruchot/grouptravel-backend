@@ -15,7 +15,35 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+
+
 const app = express();
+
+const allowedOrigins = [
+  "https://www.fellowvoyagers.fr",
+  "http://localhost:3000" // si dev local
+];
+
+// CORS (DOIT être avant les routes)
+app.use(cors({
+  origin: function (origin, callback) {
+    // Autoriser Postman, mobile, server → sans origin
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS: " + origin));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// IMPORTANT : gérer les requêtes OPTIONS (preflight)
+app.options('*', cors());
+
 
 
 // Middleware
@@ -24,10 +52,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-
-app.use(cors()); 
-// Configuration pour la sécurité et la performance
 
 
 // Configuration de l'upload de fichiers avec limites de taille
